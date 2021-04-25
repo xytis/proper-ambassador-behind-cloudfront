@@ -1,15 +1,26 @@
+data "aws_region" "current" {}
+
 locals {
+  # Remember to read README before deploying for the first time
+
+  # cluster name is used to discover node pools in lambda.
   eks_cluster_name = "NAME"
 
   # At this moment, there is no way to discover these
-  # automatically.
+  # automatically in via terraform.
+  # Adding an autoscaling group requires re-applying this
+  # terraform to correctly setup notifications.
+  #
+  # To avoid manual lambda re-runs, initialy create empty node pool (size:0)
+  # then re-run this terraform to bind notifications to SNS topic.
+  # Then when pool is scaled up, node-group-update-lambda will be triggered.
   eks_autoscaling_groups = [
     "eks-UUID-1",
     "eks-UUID-2",
   ]
 
   # Region where security groups will reside
-  target_region = "eu-central-1"
+  target_region = data.aws_region.current.name
   # VPC where security groups will reside
   vpc_id = "VPC_ID"
   # Node ports that Ambassador instances are bound to
